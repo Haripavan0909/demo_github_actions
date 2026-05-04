@@ -67,6 +67,13 @@ export const config: WebdriverIO.Config = {
                 '--disable-infobars',               // ← removes "Chrome is being controlled" bar
                 '--disable-blink-features=AutomationControlled',  // ← hides automation flag
                 '--excludeSwitches=enable-automation', // ← removes automation banner
+                
+                // Below args are optional but if we are using Github Actions or any CI environment, they are recommended to ensure smooth execution
+                '--headless', // ← runs Chrome in headless mode
+                '--disable-gpu', // ← applicable to Windows/Linux OS only
+                '--window-size=1920,1080', // ← Standard Screen size for headless mode
+                '--no-sandbox', // ← prevents permission issues in CI
+                '--disable-dev-shm-usage' // ← Fixes memory issues in Docker/CI environments
             ],
             excludeSwitches: ['enable-automation'],  // ← also needed for some Chrome versions
             // useAutomationExtension: false            // ← disables automation extension
