@@ -1,27 +1,48 @@
+# Workflow Name:
 name: WDIO Automation Pipeline
 
+# On (Trigger): When did it starts?
 on:
     push:
-        branches: [ "main" ]
+        branches: [ "main" ]  # after pushing code to main branch, this workflow will be triggered
     pull_request:
-        branches: [ "main" ]
+        branches: [ "main" ]  # when a pull request is created targeting the main branch, this workflow will be triggered
 
+# Jobs: What are the jobs to be executed?
 jobs:
     run-tests:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest  # this workflow will run on the latest version of Ubuntu available in GitHub Actions
 
         steps:
+            # Step 1: It copies the code into Github Cloud and then executes the below steps
             - name: Checkout Repository
               uses: actions/checkout@v4
 
+              # Step 2: It setup Node.js environment
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                 node-version: 20
-
+            
+            # Step 3: Install Dependencies
             - name: Install Dependencies
               run: npm install
             
+            # Step 4: Run WDIO Tests
             - name: Execute WebDriverIO Tests
               run: npx wdio run wdio.conf.ts
+            
+            # Step 5: Upload Allure Results and Screenshots as Artifacts (if any)
+            - name: Upload Test Artifacts
+              if: always()  # This ensures that artifacts are uploaded even if the tests fail
+              uses: actions/checkout@v4
+
+            - name: Upload Report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: test-reports
+                path: |
+                  allure-results/
+                  screenshots/
 
