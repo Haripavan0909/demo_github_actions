@@ -46,3 +46,8 @@ jobs:
                   allure-results/
                   screenshots/
 
+            - name: Execute WebDriverIO Tests
+              env:
+                TEST_URL: ${{ secrets.MY_APP_URL }}  # Set an environment variable to indicate tests are running in GitHub Actions
+              run: npx wdio run wdio.conf.ts
+

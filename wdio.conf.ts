@@ -96,6 +96,10 @@ export const config: WebdriverIO.Config = {
         });
     },
 
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    baseUrl: process.env.MY_APP_URL || 'https://www.pepperfry.com/',
+
     //
     // ===================
     // Test Configurations

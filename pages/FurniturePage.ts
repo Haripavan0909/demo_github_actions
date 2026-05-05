@@ -51,7 +51,7 @@ export class FurniturePage {
 
     // Open website
     async open(): Promise<void> {
-        await browser.url('https://www.pepperfry.com/');
+        await browser.url('/');
 
         // ✅ Wait for full page load
         await browser.waitUntil(
