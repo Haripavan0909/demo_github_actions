@@ -210,19 +210,25 @@ export class FurniturePage {
 
             await moreFilters.waitForExist({ timeout: 15000 });
 
-            // ✅ Scroll slightly ABOVE element (important)
+            // ✅ Scroll to center
             await browser.execute((el) => {
                 el.scrollIntoView({ block: 'center' });
             }, moreFilters);
 
             await browser.pause(1000);
 
-            // ✅ Move mouse (removes hover menu overlap)
-            await browser.moveToElement(null, 0, 0);
+            // ✅ Remove hover overlay (fix instead of moveToElement)
+            await browser.execute(() => {
+                document.body.dispatchEvent(new MouseEvent('mousemove', {
+                    bubbles: true,
+                    clientX: 0,
+                    clientY: 0
+                }));
+            });
 
             await browser.pause(500);
 
-            // ✅ JS click (bypass overlap)
+            // ✅ JS click (avoid intercepted error)
             await browser.execute((el) => {
                 el.click();
             }, moreFilters);
