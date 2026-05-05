@@ -51,35 +51,52 @@ export class FurniturePage {
 
     // Open website
     async open(): Promise<void> {
-        await browser.url('/');
+
+        // ✅ Get URL from env OR fallback
+        const url = process.env.MY_APP_URL || 'https://www.pepperfry.com/';
+
+        console.log('🌍 Launching URL:', url);
+
+        // ✅ Open website (NO dependency on baseUrl)
+        await browser.url(url);
 
         // ✅ Wait for full page load
         await browser.waitUntil(
             async () => (await browser.execute(() => document.readyState)) === 'complete',
-            { timeout: 20000 }
+            {
+                timeout: 20000,
+                timeoutMsg: '❌ Page did not load completely'
+            }
         );
 
         console.log('🌐 Pepperfry opened');
 
-        // ✅ Give extra time for JS-heavy site (headless fix)
-        await browser.pause(5000);
+        // ✅ Extra wait (Pepperfry = heavy JS site)
+        await browser.pause(4000);
 
-        // ✅ Handle popup
+        // ✅ Handle popup FIRST
         await this.closePopupIfPresent();
 
-        // ✅ Wait for menu EXIST (not displayed)
-        await this.furnitureMenu.waitForExist({
-            timeout: 20000,
-            timeoutMsg: 'Furniture menu not present in DOM'
-        });
-
-        // ✅ Scroll to top (important)
+        // ✅ Ensure top of page
         await browser.execute(() => window.scrollTo(0, 0));
-
-        // small wait
         await browser.pause(1000);
 
-        console.log('✅ Furniture menu loaded');
+        // ✅ Wait for Furniture menu (exist first)
+        await this.furnitureMenu.waitForExist({
+            timeout: 20000,
+            timeoutMsg: '❌ Furniture menu not present in DOM'
+        });
+
+        // ✅ Scroll into view
+        await this.furnitureMenu.scrollIntoView();
+        await browser.pause(800);
+
+        // ✅ Final visibility check (soft)
+        if (!(await this.furnitureMenu.isDisplayed())) {
+            console.log('⚠️ Furniture menu not visible, but present in DOM');
+        } else {
+            console.log('✅ Furniture menu visible');
+        }
     }
 
     // Close popup

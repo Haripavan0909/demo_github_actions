@@ -23,7 +23,7 @@ jobs:
 
       # 3️⃣ Install dependencies
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       # 4️⃣ Run tests (ONLY ONCE)
       - name: Execute WebDriverIO Tests
