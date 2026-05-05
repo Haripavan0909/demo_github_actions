@@ -207,21 +207,37 @@ export class FurniturePage {
     async openMaterialFilter(): Promise<void> {
         try {
             const moreFilters = await $('//*[contains(text(),"More Filters")]');
-            await moreFilters.waitForDisplayed({ timeout: 10000 });
 
-            await moreFilters.scrollIntoView();
+            await moreFilters.waitForExist({ timeout: 15000 });
+
+            // ✅ Scroll slightly ABOVE element (important)
+            await browser.execute((el) => {
+                el.scrollIntoView({ block: 'center' });
+            }, moreFilters);
+
             await browser.pause(1000);
 
-            await moreFilters.click();
+            // ✅ Move mouse (removes hover menu overlap)
+            await browser.moveToElement(null, 0, 0);
+
+            await browser.pause(500);
+
+            // ✅ JS click (bypass overlap)
+            await browser.execute((el) => {
+                el.click();
+            }, moreFilters);
+
             console.log('✅ Clicked More Filters');
 
             const material = await $('//*[contains(text(),"Material")]');
+
             await material.waitForDisplayed({ timeout: 10000 });
 
             await material.scrollIntoView();
-            await browser.pause(1000);
+            await browser.pause(500);
 
             await material.click();
+
             console.log('✅ Opened Material');
 
         } catch (error: any) {
