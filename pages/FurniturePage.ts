@@ -7,7 +7,7 @@ export class FurniturePage {
 
     // Furniture menu
     get furnitureMenu() {
-        return $('//*[@id="Furniture"]/a');
+        return $('//a[contains(text(),"Furniture")]');
     }
 
     // Settees & Benches submenu
@@ -53,15 +53,33 @@ export class FurniturePage {
     async open(): Promise<void> {
         await browser.url('https://www.pepperfry.com/');
 
-        await this.furnitureMenu.waitForDisplayed({
-            timeout: 30000,
-            timeoutMsg: 'Furniture menu not visible'
+        // ✅ Wait for full page load
+        await browser.waitUntil(
+            async () => (await browser.execute(() => document.readyState)) === 'complete',
+            { timeout: 20000 }
+        );
+
+        console.log('🌐 Pepperfry opened');
+
+        // ✅ Give extra time for JS-heavy site (headless fix)
+        await browser.pause(5000);
+
+        // ✅ Handle popup
+        await this.closePopupIfPresent();
+
+        // ✅ Wait for menu EXIST (not displayed)
+        await this.furnitureMenu.waitForExist({
+            timeout: 20000,
+            timeoutMsg: 'Furniture menu not present in DOM'
         });
 
-        console.log('✅ Pepperfry opened');
-        await browser.pause(3000);
+        // ✅ Scroll to top (important)
+        await browser.execute(() => window.scrollTo(0, 0));
 
-        await this.closePopupIfPresent();
+        // small wait
+        await browser.pause(1000);
+
+        console.log('✅ Furniture menu loaded');
     }
 
     // Close popup
@@ -198,12 +216,16 @@ export class FurniturePage {
     // Select Metal checkbox
     async selectMetalFilter(): Promise<void> {
         try {
-            const metal = await $('//*[contains(text(),"Metal")]');
+            await this.autoHandlePopup();
 
-            await metal.waitForDisplayed({ timeout: 10000 });
+            const metal = await $('//label[contains(.,"Metal")]');
+
+            await metal.waitForExist({ timeout: 15000 });
 
             await metal.scrollIntoView();
-            await browser.pause(500);
+            await browser.pause(800);
+
+            await metal.waitForDisplayed({ timeout: 10000 });
 
             await metal.click();
 

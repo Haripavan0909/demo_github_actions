@@ -60,26 +60,41 @@ export const config: WebdriverIO.Config = {
 
     capabilities: [{
         browserName: 'chrome',
+
         'goog:chromeOptions': {
             args: [
-                '--start-maximized',
-                '--disable-notifications',
-                '--disable-infobars',               // ← removes "Chrome is being controlled" bar
-                '--disable-blink-features=AutomationControlled',  // ← hides automation flag
-                '--excludeSwitches=enable-automation', // ← removes automation banner
+                '--disable-notifications',      // 🔔 Disable browser notifications (popups like "Allow notifications?")
+                '--disable-infobars',           // 🚫 Remove "Chrome is being controlled by automated test software"
+                '--disable-blink-features=AutomationControlled',   // 🤖 Hide automation flag (important for avoiding bot detection)
                 
-                // Below args are optional but if we are using Github Actions or any CI environment, they are recommended to ensure smooth execution
-                '--headless', // ← runs Chrome in headless mode
-                '--disable-gpu', // ← applicable to Windows/Linux OS only
-                '--window-size=1920,1080', // ← Standard Screen size for headless mode
-                '--no-sandbox', // ← prevents permission issues in CI
-                '--disable-dev-shm-usage' // ← Fixes memory issues in Docker/CI environments
+                // 🧠 Headless mode (runs browser without UI)
+                // 👉 Use only when running in CI / GitHub Actions
+                '--headless=new',  
+                '--disable-gpu',                // ⚡ Improves performance in headless (Windows/Linux)
+                '--window-size=1920,1080',      // 🖥️ Force desktop screen size (VERY IMPORTANT for UI visibility)
+                '--no-sandbox',                 // 🔐 Avoid permission issues in CI environments
+                '--disable-dev-shm-usage',      // 🧱 Fix memory issues in Docker / GitHub Actions
+
+                // 🕵️‍♂️ Fake real browser identity (VERY IMPORTANT for Pepperfry)
+                '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
             ],
-            excludeSwitches: ['enable-automation'],  // ← also needed for some Chrome versions
-            // useAutomationExtension: false            // ← disables automation extension
+
+            // 🚫 Remove automation switch (extra safety for detection)
+            excludeSwitches: ['enable-automation']
+
         }
     }],
     // ─────────────────────────────────────────────────────────────────────────────
+
+    before: async function () {
+        await browser.setWindowSize(1920, 1080);
+
+        await browser.execute(() => {
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => false
+            });
+        });
+    },
 
     //
     // ===================
