@@ -1,53 +1,42 @@
-# Workflow Name:
 name: WDIO Automation Pipeline
 
-# On (Trigger): When did it starts?
 on:
-    push:
-        branches: [ "main" ]  # after pushing code to main branch, this workflow will be triggered
-    pull_request:
-        branches: [ "main" ]  # when a pull request is created targeting the main branch, this workflow will be triggered
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
-# Jobs: What are the jobs to be executed?
 jobs:
-    run-tests:
-        runs-on: ubuntu-latest  # this workflow will run on the latest version of Ubuntu available in GitHub Actions
+  run-tests:
+    runs-on: ubuntu-latest
 
-        steps:
-            # Step 1: It copies the code into Github Cloud and then executes the below steps
-            - name: Checkout Repository
-              uses: actions/checkout@v4
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-              # Step 2: It setup Node.js environment
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                node-version: 20
-            
-            # Step 3: Install Dependencies
-            - name: Install Dependencies
-              run: npm install
-            
-            # Step 4: Run WDIO Tests
-            - name: Execute WebDriverIO Tests
-              run: npx wdio run wdio.conf.ts
-            
-            # Step 5: Upload Allure Results and Screenshots as Artifacts (if any)
-            - name: Upload Test Artifacts
-              if: always()  # This ensures that artifacts are uploaded even if the tests fail
-              uses: actions/checkout@v4
+      # 2️⃣ Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-            - name: Upload Report
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                name: test-reports
-                path: |
-                  allure-results/
-                  screenshots/
+      # 3️⃣ Install dependencies
+      - name: Install Dependencies
+        run: npm install
 
-            - name: Execute WebDriverIO Tests
-              env:
-                TEST_URL: ${{ secrets.MY_APP_URL }}  # Set an environment variable to indicate tests are running in GitHub Actions
-              run: npx wdio run wdio.conf.ts
+      # 4️⃣ Run tests (ONLY ONCE)
+      - name: Execute WebDriverIO Tests
+        env:
+          MY_APP_URL: ${{ secrets.MY_APP_URL }}
+        run: npx wdio run wdio.conf.ts
 
+      # 5️⃣ Upload reports
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            allure-results/
+            screenshots/
